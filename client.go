@@ -1,8 +1,8 @@
-package gobaichuan
+package aliopengo
 import (
 	"net/http"
 	"net/url"
-	"github.com/melman-go/gobaichuan/util"
+	"github.com/melman-go/aliopengo/util"
 	"fiwbee/helpers"
 	"bytes"
 )

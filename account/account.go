@@ -1,8 +1,11 @@
+//author: Melman.Go
+//http://open.taobao.com/doc2/apiDetail.htm?apiId=25270
+
 package account
 import (
-	"github.com/melman-go/gobaichuan/util"
+	"github.com/melman-go/aliopengo/util"
 	"strconv"
-	"github.com/melman-go/gobaichuan"
+	"github.com/melman-go/aliopengo"
 	"net/url"
 )
 
@@ -19,11 +22,11 @@ const (
 )
 
 //open account token 验证
-func TokenVAlidate(client *gobaichuan.AliHttpClient,token string) (*ResponseEntity, *ErrorResponse) {
+func TokenVAlidate(client *aliopengo.AliHttpClient,token string) (*ResponseEntity, *ErrorResponse) {
 	values:=  *url.Values{
 		"param_token":token,
 	}
-	resp := client.SendRequest("",values)
+	resp := client.SendRequest("taobao.open.account.token.validate",values)
 	resMap := client.ParserRespBody(resp)
 	var errorResponse *ErrorResponse
 	var respEntity *ResponseEntity

@@ -1,34 +1,48 @@
-package account
+package user
 import (
 	"github.com/melman-go/aliopengo/util"
 	. "github.com/melman-go/aliopengo"
 	"net/url"
-)
-
-const (
-	ERROR_CODE_SERVER_ERROR = 10000//系统异常了，无法处理
-	ERROR_CODE_ILLEGAL_PARAM = 10001//参数错误
-	ERROR_CODE_RECORD_ALREADY_EXIST = 20001//记录已经存在，判断依据是根据mobile、email、login_id、isv_account_id、open_id
-	ERROR_CODE_RECORD_NOT_EXIST = 20002//记录不存在，如删除的时候传了错误的id或isv_account_id
-	ERROR_CODE_DOMAIN_MISMATCH = 20004//数据域检查错误，操作了不属于自己域的数据)
-	ERROR_CODE_UPDATE_FAIL = 20005//更新时DB异常
-	ERROR_CODE_INSERT_FAIL = 20006//插入时DB异常
-	ERROR_CODE_INSERT_INDEX_FAIL = 20007//写索引DB异常
-	ERROR_CODE_INVALID_TOKEN = 20008//Token错误或者验证时间超过了1分钟
+	"strconv"
 )
 
 //open account token 验证
+//http://open.taobao.com/doc2/apiDetail?spm=0.0.0.0.lpRM2M&apiId=25270
 func TokenVAlidate(client *AliHttpClient, token string) (*OpenAccount, *ResponseEntity, *ErrorResponse) {
 	values := *url.Values{
 		"param_token":token,
 	}
 	resp := client.SendRequest("taobao.open.account.token.validate", values)
+	isOk, data, respEntity, errorResponse := client.ParserRespBody("open_account_token_validate_response","data", resp)
 	account := *OpenAccount{}
-	isOk, data, respEntity, errorResponse := client.ParserRespBody("open_account_token_validate_response", resp)
 	if isOk {
 		util.JsonDecodeS(data, account)
 	}
 	return account, respEntity, errorResponse
+}
+
+//申请免登Open Account Token
+//http://open.taobao.com/doc2/apiDetail?spm=0.0.0.0.oBca68&apiId=25271
+func TokenApply(client *AliHttpClient, tokenTimeStamp int, openAccountId int, isvAccountId string, uuid string, loginStateExpireIn int) (string, *ResponseEntity, *ErrorResponse) {
+	values := *url.Values{}
+	if tokenTimeStamp>0 {
+		values.Set("token_timestamp", strconv.Itoa(tokenTimeStamp))
+	}
+	if openAccountId>0 {
+		values.Set("open_account_id", strconv.Itoa(openAccountId))
+	}
+	if isvAccountId!="" {
+		values.Set("isv_account_id", strconv.Itoa(isvAccountId))
+	}
+	if uuid!="" {
+		values.Set("uuid", strconv.Itoa(uuid))
+	}
+	if loginStateExpireIn>0 {
+		values.Set("login_state_expire_in", strconv.Itoa(loginStateExpireIn))
+	}
+	resp := client.SendRequest("taobao.open.account.token.apply", values)
+	_, data, respEntity, errorResponse := client.ParserRespBody("open_account_token_apply_response", "data",resp)
+	return data, respEntity, errorResponse
 }
 
 

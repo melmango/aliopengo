@@ -1,11 +1,7 @@
-//author: Melman.Go
-//http://open.taobao.com/doc2/apiDetail.htm?apiId=25270
-
 package account
 import (
 	"github.com/melman-go/aliopengo/util"
-	"strconv"
-	"github.com/melman-go/aliopengo"
+	. "github.com/melman-go/aliopengo"
 	"net/url"
 )
 
@@ -22,48 +18,19 @@ const (
 )
 
 //open account token 验证
-func TokenVAlidate(client *aliopengo.AliHttpClient,token string) (*ResponseEntity, *ErrorResponse) {
-	values:=  *url.Values{
+func TokenVAlidate(client *AliHttpClient, token string) (*OpenAccount, *ResponseEntity, *ErrorResponse) {
+	values := *url.Values{
 		"param_token":token,
 	}
-	resp := client.SendRequest("taobao.open.account.token.validate",values)
-	resMap := client.ParserRespBody(resp)
-	var errorResponse *ErrorResponse
-	var respEntity *ResponseEntity
-	errorStr := resMap["error_response"]
-	successStr := resMap["open_account_token_validate_response"]
-	if errorStr!=nil {
-		util.JsonDecodeS(errorStr, &errorResponse)
+	resp := client.SendRequest("taobao.open.account.token.validate", values)
+	account := *OpenAccount{}
+	isOk, data, respEntity, errorResponse := client.ParserRespBody("open_account_token_validate_response", resp)
+	if isOk {
+		util.JsonDecodeS(data, account)
 	}
-	if successStr!=nil {
-		var dataMap map[string]string
-		util.JsonDecodeS(successStr, dataMap)
-		infoStr := dataMap["data"]
-		var account *OpenAccount
-		util.JsonDecodeS(infoStr, account)
-		respEntity = *ResponseEntity{
-			Message:dataMap["message"],
-			Successful:dataMap["code"]=="true",
-			Code:strconv.Atoi(dataMap["code"]),
-			Account:account,
-		}
-	}
-	return respEntity, errorResponse
+	return account, respEntity, errorResponse
 }
 
-type ResponseEntity struct {
-	Message    string `json:"message"`
-	Successful bool `json:"successful"`
-	Code       int32 `json:"code"`
-	Account    *OpenAccount
-}
-
-type ErrorResponse struct {
-	Code    int32 `json:"code"`
-	Msg     string `json:"msg"`
-	SubCode string `json:"sub_code"`
-	SubMsg  string `json:"sub_msg"`
-}
 
 type OpenAccount struct {
 	LoginId            string `json:"login_id"`

@@ -5,7 +5,22 @@ import (
 	"github.com/melman-go/aliopengo/util"
 	"fiwbee/helpers"
 	"bytes"
+	"io/ioutil"
+	"strconv"
 )
+
+type ResponseEntity struct {
+	Message    string `json:"message"`
+	Successful bool `json:"successful"`
+	Code       int32 `json:"code"`
+}
+
+type ErrorResponse struct {
+	Code    int32 `json:"code"`
+	Msg     string `json:"msg"`
+	SubCode string `json:"sub_code"`
+	SubMsg  string `json:"sub_msg"`
+}
 
 type AliHttpClient struct {
 	client     *http.Client
@@ -70,8 +85,35 @@ func (this *AliHttpClient) CalcSign(values *url.Values) string {
 	return sign
 }
 
-func (this *AliHttpClient) ParserRespBody(resp *http.Response) map[string]string{
-
+func (this *AliHttpClient) ParserRespBody(method string,resp *http.Response) (bool, string, *ResponseEntity, *ErrorResponse) {
+	if resp.StatusCode!=http.StatusOK {
+		return false, "", nil, nil
+	}else {
+		defer resp.Body.Close()
+		body, err := ioutil.ReadAll(resp.Body)
+		CheckHttpError(err)
+		resMap := map[string]string{}
+		util.JsonDecodeB(body, resMap)
+		var errorResponse *ErrorResponse
+		var respEntity *ResponseEntity
+		errorStr := resMap["error_response"]
+		successStr := resMap[method]
+		var data string
+		if errorStr!=nil {
+			util.JsonDecodeS(errorStr, &errorResponse)
+		}
+		if successStr!=nil {
+			var dataMap map[string]string
+			util.JsonDecodeS(successStr, dataMap)
+			data= dataMap["data"]
+			respEntity = *ResponseEntity{
+				Message:dataMap["message"],
+				Successful:dataMap["code"]=="true",
+				Code:strconv.Atoi(dataMap["code"]),
+			}
+		}
+		return true, data, respEntity, errorResponse
+	}
 }
 
 func NewAliHttpClient(baseUrl string, appkey string, appSecret string, partnerId string) *AliHttpClient {

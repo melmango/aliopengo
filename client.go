@@ -82,19 +82,28 @@ func (this *AliHttpClient) String() string {
 	return fmt.Sprintf("CLIENT: url:%s,key:%s,secret:%s\n", this.baseUrl, this.appKey, this.appSecret)
 }
 
-func (this *AliHttpClient)SendRequest(method string, values url.Values) *http.Response {
-	this.bindDefaultParams(method, values)
+func (this *AliHttpClient)PostRequest(method string, params map[string]string) *http.Response {
+	values := this.bindDefaultParams(method, params)
 	log.Error(values)
 	resp, err := this.client.PostForm(this.baseUrl, values)
 	CheckHttpError(err)
 	return resp
 }
 
+func (this *AliHttpClient)GetRequest(method string, params map[string]string) *http.Response {
+	return nil
+}
+
+
 func CheckHttpError(err error) {
 
 }
 
-func (this *AliHttpClient)bindDefaultParams(method string, values url.Values) {
+func (this *AliHttpClient)bindDefaultParams(method string, params map[string]string) url.Values{
+	values := url.Values{}
+	for k, v := range params {
+		values.Set(k, v)
+	}
 	values.Set("method", method)
 	values.Set("app_key", this.appKey)
 	if this.session!="" {
@@ -113,6 +122,7 @@ func (this *AliHttpClient)bindDefaultParams(method string, values url.Values) {
 	}
 	values.Set("sign_method", this.signMethod)
 	values.Set("sign", this.CalcSign(values))
+	return values
 }
 
 
@@ -134,7 +144,7 @@ func (this *AliHttpClient) CalcSign(values url.Values) string {
 }
 
 func (this *AliHttpClient) ParserRespBody(method string, entityKey string, resp *http.Response) (bool, interface{}, *ResponseEntity, *ErrorResponse) {
-	if resp.StatusCode!=http.StatusOK {
+	if resp==nil || resp.StatusCode!=http.StatusOK {
 		return false, nil, nil, nil
 	}else {
 		defer resp.Body.Close()
@@ -162,8 +172,29 @@ func (this *AliHttpClient) ParserRespBody(method string, entityKey string, resp 
 		}
 		return true, data, &respEntity, nil
 	}
-
 }
+
+func (this *AliHttpClient) ParserRespBodyWithoutData(method string, resp *http.Response) (bool, interface{}, *ErrorResponse) {
+	if resp==nil || resp.StatusCode!=http.StatusOK {
+		return false, nil, nil, nil
+	}else {
+		defer resp.Body.Close()
+		body, err := ioutil.ReadAll(resp.Body)
+		CheckHttpError(err)
+		resMap := map[string]interface{}{}
+		util.JsonDecodeB(body, &resMap)
+		errorMap := resMap["error_response"]
+		if errorMap!=nil {
+			errorResponse := &ErrorResponse{}
+			errorResponse.Parse(errorMap.(map[string]interface{}))
+			log.Error(errorResponse)
+			return false, nil, nil, errorResponse
+		}
+		successMap := resMap[method]
+		return true, successMap, nil
+	}
+}
+
 
 func NewAliHttpClient(baseUrl string, appkey string, appSecret string, partnerId string) *AliHttpClient {
 	client := AliHttpClient{

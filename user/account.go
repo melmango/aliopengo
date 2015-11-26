@@ -1,45 +1,44 @@
 package user
 import (
 	. "github.com/melman-go/aliopengo"
-	"net/url"
 	"strconv"
 )
 
 //open account token 验证
 //http://open.taobao.com/doc2/apiDetail?spm=0.0.0.0.lpRM2M&apiId=25270
-func TokenValidate(client *AliHttpClient, token string) (*OpenAccount, *ResponseEntity, *ErrorResponse) {
-	values := url.Values{}
-	values.Set("param_token", token)
-	resp := client.SendRequest("taobao.open.account.token.validate", values)
+func TokenValidate(client *AliHttpClient, token string) (*ResponseEntity, *ErrorResponse,*OpenAccount) {
+	params := map[string]string{}
+	params["param_token"] = token
+	resp := client.PostRequest("taobao.open.account.token.validate", params)
 	isOk, data, respEntity, errorResponse := client.ParserRespBody("open_account_token_validate_response", "data", resp)
 	var account OpenAccount
 	if isOk && data!=nil {
 		account = OpenAccount{}
 		account.Parse(data.(map[string]interface{}))
 	}
-	return &account, respEntity, errorResponse
+	return respEntity, errorResponse,&account
 }
 
 //申请免登Open Account Token
 //http://open.taobao.com/doc2/apiDetail?spm=0.0.0.0.oBca68&apiId=25271
 func TokenApply(client *AliHttpClient, tokenTimeStamp int, openAccountId int, isvAccountId string, uuid string, loginStateExpireIn int) (*ResponseEntity, *ErrorResponse, string) {
-	values := url.Values{}
+	params := map[string]string{}
 	if tokenTimeStamp>0 {
-		values.Set("token_timestamp", strconv.Itoa(tokenTimeStamp))
+		params["token_timestamp"]= strconv.Itoa(tokenTimeStamp)
 	}
 	if openAccountId>0 {
-		values.Set("open_account_id", strconv.Itoa(openAccountId))
+		params["open_account_id"]= strconv.Itoa(openAccountId)
 	}
 	if isvAccountId!="" {
-		values.Set("isv_account_id", isvAccountId)
+		params["isv_account_id"]= isvAccountId
 	}
 	if uuid!="" {
-		values.Set("uuid", uuid)
+		params["uuid"]= uuid
 	}
 	if loginStateExpireIn>0 {
-		values.Set("login_state_expire_in", strconv.Itoa(loginStateExpireIn))
+		params["login_state_expire_in"]= strconv.Itoa(loginStateExpireIn)
 	}
-	resp := client.SendRequest("taobao.open.account.token.apply", values)
+	resp := client.PostRequest("taobao.open.account.token.apply", params)
 	_, data, respEntity, errorResponse := client.ParserRespBody("open_account_token_apply_response", "data", resp)
 	return respEntity, errorResponse, data.(string)
 }

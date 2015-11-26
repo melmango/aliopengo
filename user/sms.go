@@ -2,19 +2,18 @@ package user
 import (
 	"github.com/melman-go/aliopengo/util"
 	. "github.com/melman-go/aliopengo"
-	"net/url"
 )
 //发送短信验证码
 //http://open.taobao.com/doc2/apiDetail?spm=0.0.0.0.aoyZAl&apiId=25596
 func SendVerCode(client *AliHttpClient, param SendSmsParam) (*ResponseEntity, *ErrorResponse, float64) {
-	values := url.Values{}
-	values.Set("send_ver_code_request", util.JsonEncodeS(param))
-	resp := client.SendRequest("taobao.open.sms.sendvercode", values)
+	params := map[string]string{}
+	params["send_ver_code_request"]=util.JsonEncodeS(param)
+	resp := client.PostRequest("taobao.open.sms.sendvercode", params)
 	isOk, data, respEntity, errorResponse := client.ParserRespBody("open_sms_sendvercode_response", "result", resp)
 	var taskId float64
 	if isOk {
 		resMap := data.(map[string]interface{})
-		if resMap["task_id"]!=nil{
+		if resMap["task_id"]!=nil {
 			taskId = resMap["task_id"].(float64)
 		}
 	}
@@ -22,16 +21,16 @@ func SendVerCode(client *AliHttpClient, param SendSmsParam) (*ResponseEntity, *E
 }
 
 func SendVerCodeToMobile(client *AliHttpClient, mobile string) (*ResponseEntity, *ErrorResponse, float64) {
-	values := url.Values{}
-	params := map[string]interface{}{}
-	params["mobile"] = mobile
-	values.Set("send_ver_code_request", util.JsonEncodeS(params))
-	resp := client.SendRequest("taobao.open.sms.sendvercode", values)
+	params := map[string]string{}
+	subParams := map[string]interface{}{}
+	subParams["mobile"] = mobile
+	params["send_ver_code_request"] = util.JsonEncodeS(subParams)
+	resp := client.PostRequest("taobao.open.sms.sendvercode", params)
 	isOk, data, respEntity, errorResponse := client.ParserRespBody("open_sms_sendvercode_response", "result", resp)
 	var taskId float64
 	if isOk {
 		resMap := data.(map[string]interface{})
-		if resMap["task_id"]!=nil{
+		if resMap["task_id"]!=nil {
 			taskId = resMap["task_id"].(float64)
 		}
 	}
@@ -60,10 +59,10 @@ type SendSmsParam struct {
 
 //验证短信验证码
 //http://open.taobao.com/doc2/apiDetail?spm=0.0.0.0.ZxwtyH&apiId=25597
-func CheckVerCode(client *AliHttpClient, param CheckSmsParam) (*ResponseEntity, *ErrorResponse) {
-	values := url.Values{}
-	values.Set("check_ver_code_request", util.JsonEncodeS(param))
-	resp := client.SendRequest("taobao.open.sms.checkvercode", values)
+func CheckVerCode(client *AliHttpClient, subParams CheckSmsParam) (*ResponseEntity, *ErrorResponse) {
+	params := map[string]string{}
+	params["check_ver_code_request"] = util.JsonEncodeS(subParams)
+	resp := client.PostRequest("taobao.open.sms.checkvercode", params)
 	_, _, respEntity, errorResponse := client.ParserRespBody("open_sms_checkvercode_response", "result", resp)
 	return respEntity, errorResponse
 }
@@ -77,19 +76,19 @@ type CheckSmsParam struct {
 }
 
 
-func SendMsg(client *AliHttpClient, mobile string,templateId int, context map[string]interface{}) (*ResponseEntity, *ErrorResponse, float64) {
-	values := url.Values{}
-	params := map[string]interface{}{}
-	params["mobile"] = mobile
-	params["template_id"] = templateId
-	params["context"] = context
-	values.Set("send_message_request", util.JsonEncodeS(params))
-	resp := client.SendRequest("taobao.open.sms.sendmsg", values)
+func SendMsg(client *AliHttpClient, mobile string, templateId int, context map[string]interface{}) (*ResponseEntity, *ErrorResponse, float64) {
+	params := map[string]string{}
+	subParams := map[string]interface{}{}
+	subParams["mobile"] = mobile
+	subParams["template_id"] = templateId
+	subParams["context"] = context
+	params["send_message_request"] = util.JsonEncodeS(subParams)
+	resp := client.PostRequest("taobao.open.sms.sendmsg", params)
 	isOk, data, respEntity, errorResponse := client.ParserRespBody("open_sms_sendmsg_response", "result", resp)
 	var taskId float64
 	if isOk {
 		resMap := data.(map[string]interface{})
-		if resMap["task_id"]!=nil{
+		if resMap["task_id"]!=nil {
 			taskId = resMap["task_id"].(float64)
 		}
 	}

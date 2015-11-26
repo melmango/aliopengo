@@ -15,24 +15,29 @@ func createClient() *aliopengo.AliHttpClient {
 	return aliopengo.NewAliHttpClient(URL, APP_KEY, APP_SECRET, "")
 }
 
-func TestTokenValidate(t *testing.T) {
-	client := createClient()
-	TokenValidate(client, "12345")
-}
+//func TestTokenValidate(t *testing.T) {
+//	client := createClient()
+//	TokenValidate(client, "12345")
+//}
+
+//func TestCheckText(t *testing.T){
+//	client := createClient()
+//	CheckText(client,"法轮功","11826")
+//}
 
 //func TestSendSms(t *testing.T) {
 //	client := createClient()
 //	SendVerCodeToMobile(client, "15010035751")
 //}
 
-func TestCheckSms(t *testing.T) {
-	client := createClient()
-	params := CheckSmsParam{
-		VerCode:"1234",
-		Mobile:"15010035751",
-	}
-	CheckVerCode(client, params)
-}
+//func TestCheckSms(t *testing.T) {
+//	client := createClient()
+//	params := CheckSmsParam{
+//		VerCode:"1234",
+//		Mobile:"15010035751",
+//	}
+//	CheckVerCode(client, params)
+//}
 
 //func TestSendMsg(t *testing.T){
 //	client := createClient()

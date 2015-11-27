@@ -2,21 +2,34 @@ package user
 import (
 	. "github.com/melman-go/aliopengo"
 	"strconv"
+	"github.com/ngaut/log"
 )
 
 //open account token 验证
 //http://open.taobao.com/doc2/apiDetail?spm=0.0.0.0.lpRM2M&apiId=25270
-func TokenValidate(client *AliHttpClient, token string) (*ResponseEntity, *ErrorResponse,*OpenAccount) {
+func TokenValidate(client *AliHttpClient, token string) (*ResponseEntity, *ErrorResponse, *OpenAccount, int64) {
 	params := map[string]string{}
 	params["param_token"] = token
 	resp := client.PostRequest("taobao.open.account.token.validate", params)
 	isOk, data, respEntity, errorResponse := client.ParserRespBody("open_account_token_validate_response", "data", resp)
+	log.Error(data)
+	var openAccountId int64
 	var account OpenAccount
 	if isOk && data!=nil {
-		account = OpenAccount{}
-		account.Parse(data.(map[string]interface{}))
+		for k, v := range data.(map[string]interface{}) {
+			switch k{
+			case "open_account_id":openAccountId = int64(v.(float64))
+			case "ext":{
+				openAccountMap := v.(map[string]interface{})["open_account"]
+				if openAccountMap!=nil {
+					account = OpenAccount{}
+					account.Parse(openAccountMap.(map[string]interface{}))
+				}
+			}
+			}
+		}
 	}
-	return respEntity, errorResponse,&account
+	return respEntity, errorResponse, &account, openAccountId
 }
 
 //申请免登Open Account Token
@@ -61,18 +74,18 @@ type OpenAccount struct {
 	Mobile             string `json:"mobile"`
 	CreateLocation     string `json:"create_location"`
 	ExtInfos           string `json:"ext_infos"`
-	LogonPwdIntensity  int  `json:"login_pwd_intensity"`
-	Id                 int  `json:"id"`
-	Type               int  `json:"type"`
-	Status             int  `json:"status"`
-	Version            int  `json:"version"`
-	LoginPwdEncryption int  `json:"login_pwd_encryption"`
-	Gender             int  `json:"gender"`
+	LogonPwdIntensity  int64  `json:"login_pwd_intensity"`
+	Id                 int64  `json:"id"`
+	Type               int64  `json:"type"`
+	Status             int64  `json:"status"`
+	Version            int64  `json:"version"`
+	LoginPwdEncryption int64  `json:"login_pwd_encryption"`
+	Gender             int64  `json:"gender"`
 	Name               string `json:"name"`
 	Birthday           string `json:"birthday"`
 	WangWang           string `json:"wangwang"`
 	Weixin             string `json:"weixin"`
-	OauthPlatform      int  `json:"oauth_plateform"`
+	OauthPlatform      int64  `json:"oauth_plateform"`
 }
 
 
@@ -96,18 +109,18 @@ func (this *OpenAccount) Parse(res map[string]interface{}) {
 		case "mobile":this.Mobile = v.(string)
 		case "create_location":this.CreateLocation = v.(string)
 		case "ext_infos":this.ExtInfos = v.(string)
-		case "login_pwd_intensity":this.LogonPwdIntensity = v.(int)
-		case "id":this.Id = v.(int)
-		case "type":this.Type = v.(int)
-		case "status":this.Status = v.(int)
-		case "version":this.Version = v.(int)
-		case "login_pwd_encryption":this.LoginPwdEncryption = v.(int)
-		case "gender":this.Gender = v.(int)
+		case "login_pwd_intensity":this.LogonPwdIntensity = int64(v.(float64))
+		case "id":this.Id = int64(v.(float64))
+		case "type":this.Type = int64(v.(float64))
+		case "status":this.Status = int64(v.(float64))
+		case "version":this.Version = int64(v.(float64))
+		case "login_pwd_encryption":this.LoginPwdEncryption = int64(v.(float64))
+		case "gender":this.Gender = int64(v.(float64))
 		case "name":this.Name = v.(string)
 		case "birthday":this.Birthday = v.(string)
 		case "wangwang":this.WangWang = v.(string)
 		case "weixin":this.Weixin = v.(string)
-		case "oauth_plateform":this.OauthPlatform = v.(int)
+		case "oauth_plateform":this.OauthPlatform = int64(v.(float64))
 		}
 	}
 }

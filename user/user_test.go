@@ -2,6 +2,8 @@ package user
 import (
 	"testing"
 	"github.com/melman-go/aliopengo"
+	"github.com/ngaut/log"
+	"github.com/melman-go/aliopengo/util"
 )
 
 const (
@@ -15,14 +17,18 @@ func createClient() *aliopengo.AliHttpClient {
 	return aliopengo.NewAliHttpClient(URL, APP_KEY, APP_SECRET, "")
 }
 
-//func TestTokenValidate(t *testing.T) {
-//	client := createClient()
-//	TokenValidate(client, "12345")
-//}
+func TestTokenValidate(t *testing.T) {
+	client := createClient()
+	_,_,account,id := TokenValidate(client, "5f+pfdl0AqOrQxHnW11Y2l584ER+xZF5mo/x4IepP3ABxMozXYXhFrZtVZK5NKQvPE+iLGoHXIVbGaS6uXKeUaJPiA88PfOIsIu+T1PBL9L+U2hjgXVpnAAmxkxitp3Ep44gDt4CIxcIEECfXS/f16fHwXNKpX1N089oJphVQtUig9yRT2/hgMQ7ihcJu+CVHWKYVIEs3WkOo4UVfwAj/0Kd328XutVgudZfTgRCYAmjyWFUhZr9wriCpZKgFih81ADoSND6wQEBz5GwOBHevH841Vk2rQH3OPKuxGZLe0vrIrivHieCu0LBGOLG9QeN4Pzk/YAbZrmWFiMHznbIgWRbFdXgPjxzlX0FCMnWakTuCKCI2djcyk3Fx5vKxSuRLFRh2JWGfKlqoJtZlWVDeEYEw61tfdUnyFHkq2uqLg8=")
+	if account!=nil{
+		log.Error(util.JsonEncodeS(account))
+		log.Error(id)
+	}
+}
 
 //func TestCheckText(t *testing.T){
 //	client := createClient()
-//	CheckText(client,"法轮功","11826")
+//	CheckText(client,"测试","11826")
 //}
 
 //func TestSendSms(t *testing.T) {

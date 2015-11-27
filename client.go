@@ -99,7 +99,7 @@ func CheckHttpError(err error) {
 
 }
 
-func (this *AliHttpClient)bindDefaultParams(method string, params map[string]string) url.Values{
+func (this *AliHttpClient)bindDefaultParams(method string, params map[string]string) url.Values {
 	values := url.Values{}
 	for k, v := range params {
 		values.Set(k, v)
@@ -176,7 +176,7 @@ func (this *AliHttpClient) ParserRespBody(method string, entityKey string, resp 
 
 func (this *AliHttpClient) ParserRespBodyWithoutData(method string, resp *http.Response) (bool, interface{}, *ErrorResponse) {
 	if resp==nil || resp.StatusCode!=http.StatusOK {
-		return false, nil, nil, nil
+		return false, nil, nil
 	}else {
 		defer resp.Body.Close()
 		body, err := ioutil.ReadAll(resp.Body)
@@ -188,7 +188,7 @@ func (this *AliHttpClient) ParserRespBodyWithoutData(method string, resp *http.R
 			errorResponse := &ErrorResponse{}
 			errorResponse.Parse(errorMap.(map[string]interface{}))
 			log.Error(errorResponse)
-			return false, nil, nil, errorResponse
+			return false, nil, errorResponse
 		}
 		successMap := resMap[method]
 		return true, successMap, nil

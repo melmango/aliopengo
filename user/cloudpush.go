@@ -14,7 +14,7 @@ target 推送目标: device:推送给设备; account:推送给指定帐号,all: 
 targetValue 根据Target来设定，如Target=device, 则对应的值为 设备id1,设备id2. 多个值使用逗号分隔
 deviceType 1-iOS 2-Android
  */
-func CloudPushMessage(client *AliHttpClient, deviceType int, body string, target string, targetValue string) (*ErrorResponse, *SendPushResult) {
+func CloudPushMessage(client *AliHttpClient, deviceType int, body string, target string, targetValue string) (*SendPushResult,*ErrorResponse) {
 	params := map[string]string{}
 	params["body"] = body
 	params["target"] = target
@@ -37,10 +37,10 @@ func CloudPushMessage(client *AliHttpClient, deviceType int, body string, target
 		result = SendPushResult{}
 		result.Parse(data.(map[string]interface{}))
 	}
-	return &result, errorResponse
+	return &result,errorResponse
 }
 
-func CloudPushNoticeAndroid(client *AliHttpClient, summary string, target string, target_value string, title string) {
+func CloudPushNoticeAndroid(client *AliHttpClient, summary string, target string, target_value string, title string) (*SendPushResult,*ErrorResponse){
 	params := map[string]string{}
 	params["summary"] = summary
 	params["target"] = target
@@ -56,7 +56,7 @@ func CloudPushNoticeAndroid(client *AliHttpClient, summary string, target string
 	return &result, errorResponse
 }
 
-func CloudPushNoticeiOS(client *AliHttpClient, summary string, target string, target_value string, env string, ext string) (*ErrorResponse, *SendPushResult) {
+func CloudPushNoticeiOS(client *AliHttpClient, summary string, target string, target_value string, env string, ext string) (*SendPushResult,*ErrorResponse) {
 	params := map[string]string{}
 	params["summary"] = summary
 	params["target"] = target
